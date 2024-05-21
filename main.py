@@ -62,14 +62,21 @@ def main():
     pattern = r"\(.*?\)"
     lyriclist = re.sub(pattern,"", " ".join(lyriclist)).split(" ")
 
-    for i, word in enumerate(lyriclist):
-        print(f"Searching for tracks for '{word}'...")
-        tracks_list = search_tracks(word)
-        for track in tracks_list:
-            if track['title'].lower() == word.lower():
-                print(track['title'], "by", track["artist"]["name"])
-                break
-
+    for i in range(len(lyriclist)):
+        for j in range(1, min(6, len(lyriclist) - i) + 1):
+            phrase = ' '.join(lyriclist[i:i + j])
+            # print(f"Searching for tracks for '{phrase}'...")
+            tracks_list = search_tracks(phrase)
+            for track in tracks_list:
+                if track['title'].lower() == phrase.lower():
+                    print(track['title'], "==", track["artist"]["name"])
+                    matches.append(track)
+                    break
+            else:
+                continue
+            break
+        else:
+            continue
 
     print(len(lyriclist),len(matches))
 
