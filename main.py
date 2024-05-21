@@ -49,10 +49,16 @@ def get_exact_match_track(trackslist, word):
             return track
     return None
 
+def full_appearance(substring, string):
+    pattern = rf'\b{re.escape(substring)}\b'
+    match = re.search(pattern, string)
+    return match is not None
+
+# print(full_appearance("ever had the feeling","have you ever"))
 
 def main():
     lyriclist = []
-    matches = []
+    matched_tracks = []
     with open("lyrics", "r") as file:
         for line in file:
             words = line.split()
@@ -69,8 +75,7 @@ def main():
             tracks_list = search_tracks(phrase)
             for track in tracks_list:
                 if track['title'].lower() == phrase.lower():
-                    print(track['title'], "==", track["artist"]["name"])
-                    matches.append(track)
+                    matched_tracks.append(track)
                     break
             else:
                 continue
@@ -78,7 +83,17 @@ def main():
         else:
             continue
 
-    print(len(lyriclist),len(matches))
+    i=1
+    while i <= len(matched_tracks)-1:
+        if full_appearance(matched_tracks[i]['title'].lower(), matched_tracks[i-1]['title'].lower()):
+            matched_tracks.pop(i)
+            i=1
+            continue
+        i+=1
+
+
+    for track in matched_tracks:
+        print(track['title'], "==", track["artist"]["name"])
 
 
 if __name__ == "__main__":
