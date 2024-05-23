@@ -49,12 +49,34 @@ def get_exact_match_track(trackslist, word):
             return track
     return None
 
+
 def full_appearance(substring, string):
     pattern = rf'\b{re.escape(substring)}\b'
     match = re.search(pattern, string)
     return match is not None
 
-# print(full_appearance("ever had the feeling","have you ever"))
+def remove_consecutive_duplicates(text):
+    words = text.split()
+    cleaned_text = [words[0]]  # Start with the first word
+
+    # Iterate over the words starting from the second one
+    for i in range(1, len(words)):
+        # If the current word is not the same as the previous one, add it to the cleaned text
+        if words[i] != words[i - 1]:
+            cleaned_text.append(words[i])
+
+    # Join the cleaned words back into a string
+    return ' '.join(cleaned_text)
+
+
+def get_matchability_score(lyric_list,matched_tracks):
+    words_in_matches = [track['title'].lower() for track in matched_tracks] # returns array
+    cleaned_word_in_matches = remove_consecutive_duplicates(" ".join(words_in_matches))
+    count=0
+    for word in lyric_list:
+        if word in cleaned_word_in_matches:
+            count += 1
+    return round((count/len(lyric_list)*100),2)
 
 def main():
     lyriclist = []
@@ -67,15 +89,16 @@ def main():
     # Remove brackets and insides
     pattern = r"\(.*?\)"
     lyriclist = re.sub(pattern,"", " ".join(lyriclist)).split(" ")
-
+    print(lyriclist)
     for i in range(len(lyriclist)):
-        for j in range(1, min(6, len(lyriclist) - i) + 1):
+        for j in range(1, min(8, len(lyriclist) - i) + 1):
             phrase = ' '.join(lyriclist[i:i + j])
-            # print(f"Searching for tracks for '{phrase}'...")
+            print(f"Searching for titles phrassed: '{phrase}'...")
             tracks_list = search_tracks(phrase)
             for track in tracks_list:
                 if track['title'].lower() == phrase.lower():
                     matched_tracks.append(track)
+                    print("Found")
                     break
             else:
                 continue
@@ -93,8 +116,9 @@ def main():
 
 
     for track in matched_tracks:
-        print(track['title'], "==", track["artist"]["name"])
+        print(track['title'], "_________________", track["artist"]["name"])
 
+    print(f"Match Score: {get_matchability_score(lyriclist, matched_tracks)}%")
 
 if __name__ == "__main__":
     main()
